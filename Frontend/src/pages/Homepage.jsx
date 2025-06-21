@@ -13,7 +13,7 @@ function Homepage() {
       try {
         const res = await api.get("/notes");
         setNotes(res.data);
-        console.log(notes);
+        console.log(res.data);
       } catch (error) {
         console.log("Error fetching notes");
         console.log(error);

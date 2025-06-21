@@ -1,17 +1,23 @@
 import express from "express"; // const express = require("express");
-import notesRouter from "./routes/notesRoutes.js";
+import router from "./routes/notesRoutes.js";
 import { connectDB } from "../config/db.js";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
+
 const app = express();
+const PORT = process.env.PORT || 5001;
+const __dirname = path.resolve();
 
 dotenv.config();
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-  })
-);
+if (process.env.NODE_ENV !== "production") {
+  app.use(
+    cors({
+      origin: "http://localhost:5173",
+    })
+  );
+}
 app.use(express.json());
 
 //simple custom midddleware
@@ -20,14 +26,18 @@ app.use(express.json());
 //   next();
 // });
 
-app.use("/api/notes", notesRouter);
+app.use("/api/notes", router);
 
-const PORT = process.env.PORT || 5001;
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  app.get("/*", (req, res, next) => {
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  });
+}
 
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Server started on PORT: ${PORT}`);
   });
 });
-
-//mongodb+srv://toolsai897:8CFh1gKAh3kZhSNYongodb.net/?retryWrites=true&w=majority&appName=Cluster0
